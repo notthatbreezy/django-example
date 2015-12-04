@@ -1,0 +1,27 @@
+# PostgreSQL Server with PostGIS Installed
+postgres:
+  image: quay.io/azavea/postgis:0.1.0
+  environment:
+    POSTGRES_USER: django
+    POSTGRES_PASSWORD: django
+    POSTGRES_DB: django
+  ports:
+    - "5432:5432"
+
+# Starts gunicorn worker with reload
+django:
+  build: django
+  ports:
+    - "8080:8080"
+    - "8081:8081"
+  volumes:
+    - ./django/opt/django_example:/opt/django_example
+  links:
+    - postgres
+
+# Serves static files and proxies to gunicorn & django
+nginx:
+  image: nginx:1.9.7
+  volumes:
+    - ./etc/nginx/nginx.conf:/etc/nginx.conf:ro
+    - ./srv/dist/:/srv/dist/
